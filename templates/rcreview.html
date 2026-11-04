@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+
+{% block head_content %}
+<title>{{ album["name"] }}: Reviewed</title>
+<meta property="og:title" content="{{ album['name'] }}: Reviewed ({{ album['genre'] }})">
+<meta property="og:image" content="{{ album['image'] }}">
+<meta property="og:description" content="{{ album['notes'] }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="review-page-content">
+    <div class="d-flex review-lcp-container">
+        <div class="row header-grid">
+            <div class="col-xs-0 col-sm-4 col-md-5 col-lg-5 col-xl-5 col-xxl-5"></div>
+            <div class="col-xs-12 col-sm-8 col-md-7 col-lg-7 col-xl-7 col-xxl-7 review-cover-art-container">
+                <img src="{{ album['image'] }}&tr=w-855,h-855" class="review-cover-art" fetchpriority="high" loading="eager" alt="Cover art">
+                <p class="review-image-copyright">Credit: <span id="image-copyright" {% if current_user.is_authenticated %} contenteditable="true" {% endif %} >{{ album["imageCopyright"] }}</span></p>    
+            </div>
+        </div>
+        <div class="container review-heading-container">
+            <div class="review-heading-text">
+                <strong><h1 class="review-heading"><span id="title">{{ album["name"] }}</span></h1></strong>
+                <p class="artist">[By: <span id="artist">{{ album["artist"] }}</span>]</p>
+            </div>
+            <br>
+            <div class="review-heading-text">
+                <a class="review-genre-text" href="/review/{{ album['parentAlbum'] }}">Link to parent album</a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid review-main-body-container">
+        <div class="row">
+            <div class="col-md-4 col-lg-4 col-xl-4 col-xxl-4 order-1 order-md-2 order-lg-2 order-xl-2 order-xxl-2">
+                <div class="review-stats-container">
+                {% if current_user.is_authenticated %}
+                    <p><strong>Average track rating: </strong><span id="avg-rating" contenteditable="true">{{ album["avgRating"] }}</span></p>
+                {% else %}
+                    <p><strong>Average track rating: </strong><span id="avg-rating">{{ (((album["avgRating"])|round(0))|string)[:-2] }}</span></p>
+                {% endif %}
+                </div>
+                <p class="review-stats-small-info">Written <span {% if current_user.is_authenticated %} contenteditable="true" {% endif %} id="date">{{ album["date"] }}</span></p>
+                {% if current_user.is_authenticated %}
+                <!-- button to delete album -->
+                {% set albumId = album["id"] %}
+                <br>
+                <button class="delete-album-button" onclick="openDelete()">DELETE ALBUM</button>
+                <!-- extra step to delete -->
+                <div class="popout-form closed" id="delete-form">
+                    <button class="delete-album-button" onclick="deleteAlbum('{{ albumId }}')">CONFIRM DELETE</button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="container-fluid col-md-8 col-lg-8 col-xl-8 col-xxl-8 order-2 order-md-1 order-lg-1 order-xl-1 order-xxl-1">
+                {% if current_user.is_authenticated %}
+                <!-- editable spotify and image link (for admin) -->
+                <div class="review-admin-metadata">
+                    <p contenteditable="true" id="spotify-link">{{ album["spotifyLink"] }}</p>
+                    <br><br>
+                    <p contenteditable="true" id="image">{{ album["image"] }}</p>
+                </div>
+                <br>
+                {% endif %}
+                <!-- all the paragraphs -->
+                <div class="review-paragraph-container">
+                    <p id="notes" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["notes"] }}</p>
+                    <br>
+                    <hr>
+                    <br>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <ol class="ranking-container">
+                        {% for track in tracks %}
+                        <li class="rc-track"><strong class="name">{{ track["name"] }}</strong> - <span class="comments">{{ track["comments"] }}</span> <strong class="{% if track['rating'] >= 100 %} turquoise {% elif track['rating'] >= 90 %} blue {% elif track['rating'] >= 80 %} purple {% elif track['rating'] >= 70 %} green {% elif track['rating'] >= 60 %} yellow {% elif track['rating'] >= 50 %} orange {% elif track['rating'] >= 40 %} red {% elif track['rating'] >= 30 %} pink {% elif track['rating'] >= 20 %} brown {elif track['rating'] >= 10 %} grey {% endif %}">(<span class="rating">{{ (track["rating"])|round(0)|int }}</span>/100)</strong></li>
+                        <br>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+        {% if current_user.is_authenticated %}
+            <table class="tbt-table" id="admin-table">
+                <thead>
+                    <th>Name</th>
+                    <th>Comments</th>
+                    <th>Rating</th>
+                </thead>
+                <tbody>
+                    {% for track in admin_tracks %}
+                    <tr class="tbt-row">
+                        <td class="tbt-name" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["name"] }}</td>
+                        <td class="tbt-comments" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["comments"] }}</td>
+                        <td class="tbt-rating" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["rating"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                        
+            <button class="add-tbt-button" onclick="addTrack('{{ last_track_index }}')">+ Add Track</button>
+            <button class="add-tbt-button" onclick="deleteTrack('{{ last_track_index }}')">Delete last track</button>
+            <button class="add-tbt-button" onclick="updateTrackQuality()">Update track quality</button>
+        {% endif %}
+    </div>
+</div>
+                
+{% endblock %}
+
+
+{% block scripts %}
+<script src="/static/rcreviewScript.js"></script>
+{% endblock %}

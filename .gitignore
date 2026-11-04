@@ -1,0 +1,11 @@
+*.db
+*__pycache__/
+.env
+wandererenv/
+*.sock
+*.pyc
+sql_run_cmd.py
+wanderer-reviews/
+
+*.txt
+!requirements.txt

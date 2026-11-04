@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block head_content %}
+<title>{{ decoded_attributes["name"] }}: Reviewed</title>
+<meta property="og:title" content="{{ album['name'] }}: Reviewed">
+<meta property="og:description" content="{{ album['introParagraph'] }}">
+<meta property="og:image" content="{{ album['image'] }}">
+{% endblock %}
+
+{% block content %}
+<div class="review-page-content">
+    <div class="d-flex review-lcp-container">
+        <div class="row header-grid">
+            <div class="col-xs-0 col-sm-4 col-md-5 col-lg-5 col-xl-5 col-xxl-5"></div>
+            <div class="col-xs-12 col-sm-8 col-md-7 col-lg-7 col-xl-7 col-xxl-7 review-cover-art-container">
+                <img src="{{ album['image'] }}&tr=w-855,h-855" class="review-cover-art" fetchpriority="high" loading="eager" alt="Cover art">
+                <p class="review-image-copyright">Credit: <span id="image-copyright" {% if current_user.is_authenticated %} contenteditable="true" {% endif %} >{{ album["imageCopyright"] }}</span></p>    
+            </div>
+        </div>
+        <div class="container review-heading-container">
+            <div class="review-heading-text">
+                <strong><h1 class="review-heading"><span id="title">{{ decoded_attributes["name"] }}</span></h1></strong>
+                <p class="artist">[By: <span id="artist">{{ decoded_attributes["artist"] }}</span>]</p>
+            </div>
+            <br>
+            <div class="review-heading-text">
+                <p class="review-genre-text">Genre: <span id="genre" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["genre"] }}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid review-main-body-container">
+        <div class="row">
+            <div class="col-md-4 col-lg-4 col-xl-4 col-xxl-4 order-1 order-md-2 order-lg-2 order-xl-2 order-xxl-2">
+                <div class="review-stats-container">
+                {% if current_user.is_authenticated %}
+                    <p><strong>Rating: </strong><span id="rating" contenteditable="true">{{ album["rating"] }}</span></p>
+                    <br>
+                    <p><strong>Cohesiveness: </strong><span id="cohesiveness" contenteditable="true">{{ album["cohesiveness"] }}</span></p>
+                    <br>
+                    <p><strong>Track quality: </strong><span id="track-quality" contenteditable="true">{{ album["trackQuality"] }}</span></p>
+                {% else %}
+                    <p><strong>Rating: </strong><span id="rating">{{ (((((album["rating"] / 5)|round(0)) * 5))|string)[:-2] }}</span></p>
+                    <br>
+                    <p><strong>Cohesiveness: </strong><span id="cohesiveness">{{ (album["cohesiveness"])|round(0)|int }}</span></p>
+                    <br>
+                    <p><strong>Track quality: </strong><span id="track-quality">{{ (album["trackQuality"])|round(0)|int }}</span></p>
+                {% endif %}
+                    <br>
+                    <p><strong>Beginner-friendly? </strong><span id="beginner-friendly" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["beginnerFriendly"] }}</span></p>
+                </div>
+                <p class="review-stats-small-info">Published <span {% if current_user.is_authenticated %} contenteditable="true" {% endif %} id="date">{{ album["date"] }}</span></p>
+                {% if current_user.is_authenticated %}
+                <!-- button to delete album -->
+                {% set albumId = album["id"] %}
+                <br>
+                <button class="delete-album-button" onclick="openDelete()">DELETE ALBUM</button>
+                <!-- extra step to delete -->
+                <div class="popout-form closed" id="delete-form">
+                    <button class="delete-album-button" onclick="deleteAlbum('{{ albumId }}')">CONFIRM DELETE</button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="container-fluid col-md-8 col-lg-8 col-xl-8 col-xxl-8 order-2 order-md-1 order-lg-1 order-xl-1 order-xxl-1">
+                {% if current_user.is_authenticated %}
+                    <!-- editable spotify and image link (for admin) -->
+                    <div class="review-admin-metadata">
+                        (CTRL+C) ⭐
+                        <br><br>
+                        Spotify link: <p contenteditable="true" id="spotify-link">{{ album["spotifyLink"] }}</p>
+                        <br><br>
+                        Image: <p contenteditable="true" id="image">{{ album["image"] }}</p>
+                        <br><br>
+                        Tags: <p contenteditable="true" id="tags">{{ album["tags"] }}</p>
+                        <br><br>
+                        Release date: <p contenteditable="true" id="release-date">{{ album["releaseDate"] }}</p>
+                        <br><br>
+                    </div>
+                {% endif %}
+                <div class="review-paragraph-container">
+                    {% if current_user.is_authenticated %}
+                    <div class="container-fluid d-flex justify-content-center">
+                        <button class="add-tbt-button" onclick="addTbt('{{ lastTrack }}')">+ Add Track</button>
+                        <button class="add-tbt-button" onclick="deleteTbt('{{ lastTrack }}')">Delete last track</button>
+                        <button class="add-tbt-button" onclick="updateTrackQuality()">Update track quality</button>
+                    </div>
+                    <br>
+                    {% endif %}
+                    {% if album["type"] == "LP" %}
+                        <p id="intro-paragraph" class="review-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["introParagraph"] | safe }}</p>
+                        <br><br>
+                        <p id="summary-paragraph" class="review-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["summaryParagraph"] | safe }}</p>
+                        <br><br>
+                        <p id="opinion-paragraph" class="review-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["opinionParagraph"] | safe }}</p>
+                    {% else %}
+                        <p id="intro-paragraph" class="review-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["introParagraph"] | safe }}</p>
+                        <br><br>
+                        <p class="review-paragraph"><strong style="text-decoration: underline;">The good</strong><strong>:</strong> <span id="summary-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["summaryParagraph"] | safe }}</span></p>
+                        <br><br>
+                        <p class="review-paragraph"><strong style="text-decoration: underline;">The bad</strong><strong>:</strong> <span id="opinion-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ album["opinionParagraph"] | safe }}</span></p>
+                    {% endif %}
+                    <br><br>
+                    <a href="{{ album['spotifyLink'] }}">Listen on Spotify here.</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="tbt-button" onclick="showTBT()"><h3 class="tbt-header">Track by track &#40;Click to show&#41;</h3></button>
+    <div class="tbt-container closed">
+        {% for track in tbt %}
+        <div class="tbt-track-container">
+            <p class="tbt-track-head"><span class="tbt-track-name" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["name"] }}</span> {% if track["superlative"] != "WIP" or current_user.is_authenticated %}<span class="tbt-track-superlative" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["superlative"] }}</span>{% endif %}<span class="tbt-track-ranking-container"> {% if current_user.is_authenticated %}| (<span class="tbt-track-rating" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{% if current_user.is_authenticated %}{{ track["rating"] }}{% else %}{{ (track["rating"])|round(0)|int }}{% endif %}</span>/100)</span>{% endif %}</p>
+            <p class="tbt-track-collabs-container"></span>{% if (track["collabs"] != "WIP" and track["collabs"] != "WIP ") or (current_user.is_authenticated) %} w/ <span class="tbt-track-collabs" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["collabs"] }} {% endif %}</span></p>
+            <p class="tbt-track-comments" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["comments"] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- button to open the ranking -->
+    <button class="tbt-button ranking-button" onclick="showRanking()"><h3 class="ranking-header">Track ranking &#40;Click to show&#41;</h3></button>
+    <!-- actual ranking -->
+    <div class="d-flex justify-content-center">
+        <ol class="ranking-container closed">
+            <br>
+            {% for track in ranking %}
+            <li><span class="ranking-name">{{ track["name"] }}</span>{% if (track["collabs"] != "WIP" and track["collabs"] != "WIP ") or (current_user.is_authenticated) %}<em> w/ <span class="ranking-collabs" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ track["collabs"] }} {% endif %}</span></em> {% if track["superlative"] != "WIP" %}<span>{{ track["superlative"] }}</span> {% endif %} {% if current_user.is_authenticated %} <strong class="{% if track['rating'] >= 100 %} turquoise {% elif track['rating'] >= 90 %} blue {% elif track['rating'] >= 80 %} purple {% elif track['rating'] >= 70 %} green {% elif track['rating'] >= 60 %} yellow {% elif track['rating'] >= 50 %} orange {% elif track['rating'] >= 40 %} red {% elif track['rating'] >= 30 %} pink {% elif track['rating'] >= 20 %} brown {elif track['rating'] >= 10 %} grey {% endif %}">&#40<span class="ranking-rating" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{% if current_user.is_authenticated %}{{ track["rating"] }}{% else %}{{ (track["rating"])|round(0)|int }}{% endif %}</span>/100&#41</strong>{% endif %}</p>
+            {% endfor %}
+        </ol>
+        <br>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="/static/reviewScript.js"></script>
+{% endblock %}

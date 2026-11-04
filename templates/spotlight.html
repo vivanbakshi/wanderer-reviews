@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+{% block head_content %}
+<title>{{ post["title"] }}</title>
+{% endblock %}
+
+
+{% block content %}
+<section class="post-main-content">
+    {% if current_user.is_authenticated %}
+        <div class="popout-form closed" id="delete-form">
+            {% set postId = post["id"] %}
+            <button class="delete-album-button" onclick="deletePost('{{ postId }}')">CONFIRM DELETE</button>
+        </div>
+    {% endif %}
+    <div class="all-post-content">
+        <div class="spotlight-header-container">
+            <h1 class="post-heading" id="title">{{ post["title"] }}</h1>
+            <p class="post-summary" id="summary" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ post["summary"] }}</p>
+            <img src="{{ post['leadImage'] }}" alt="Lead image" class="spotlight-lead-image">
+        </div>
+        {% if current_user.is_authenticated %}
+        <p contenteditable="true" id="image">{{ post["leadImage"] }}</p>
+        <br>
+        <p class="spotlight-content post-paragraph" id="content" contenteditable="true">{{ post["content"] | safe }}</p>
+        <button class="delete-album-button" onclick="openForm('delete-form')">DELETE POST</button>
+        {% else %}
+        <p class="spotlight-content post-paragraph" id="content">{{ post["content"] | safe }}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="/static/spotlightScript.js"></script>
+{% endblock %}

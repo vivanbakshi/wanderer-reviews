@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+
+{% block head_content %}
+<title>Posts</title>
+<meta property="og:title" content="The Wanderer: Posts">
+<meta property="og:description" content="My album reviews website, for all things electronic!">
+<meta property="og:image" content="static/logo_alt.svg">
+{% endblock %}
+
+
+
+{% block content %}
+<div class="home-main-content">
+    <head class="text-centerer">
+        <h1 class="page-title">Latest posts</h1>
+    </head>
+    <section class="home-display-section">
+        <div class="home-max-width-section">
+            {% for post in posts %}
+            {% if post["leadImage"] != "https://ik.imagekit.io/thewandererreviews/logo.svg?updatedAt=1738429520313" or current_user.is_authenticated %}
+            <div>
+                <hr>
+                <a href="/posts/{{ post['id'] }}" class="review-container">
+                    <img src="{{ post['leadImage'] }}&tr=w-200,h-200" alt="Lead image" class="home-display-side-image">
+                    <div class="home-display-side-info">
+                        <p class="small-card-title">{{ post['title'] }}</p>
+                        <p class="small-card-intro">{{ post['summary'] }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+
+{% endblock %}

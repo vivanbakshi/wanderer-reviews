@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+<!-- extra stuff in the head -->
+{% block head_content %}
+<meta property="og:title" content="The Wanderer Reviews">
+<meta property="og:description" content="My album reviews website, for all things electronic!">
+<meta property="og:image" content="static/logo_alt.svg">
+<title>The Wanderer Reviews</title>
+{% endblock %}
+
+<!-- main content -->
+{% block content %}
+<div class="home-main-content">
+    {% if current_user.is_authenticated %}
+    <div class="popout-form closed" id="add-album-form-buffer">
+        <button class="toolbar-submit-button" onclick="closeForms(); openForm('add-album-form')">Add EP/LP</button>
+        <button class="toolbar-submit-button" onclick="closeForms(); openForm('add-rc-form')">Add RC</button>
+        <button class="toolbar-submit-button" onclick="closeForms(); openForm('add-post-form')">Add Post</button>
+    </div>
+    <div class="popout-form closed" id="add-album-form">
+        <form method="POST" action="/add-album">
+            <input type="text" class="popout-form-text-input" name="name" placeholder="Album name">
+            <input type="text" class="popout-form-text-input" name="artist" placeholder="Artist">
+            <select class="toolbar-select" name="type">
+                <option value="LP">LP</option>
+            </select>
+            <input type="submit" class="toolbar-submit-button" value="Add Album">
+        </form>
+    </div>
+    <div class="popout-form closed" id="add-rc-form">
+        <form method="POST" action="/add-album">
+            <input type="text" class="popout-form-text-input" name="parent-name" placeholder="Parent album name">
+            <input type="text" class="popout-form-text-input" name="name" placeholder="Remix comp name">
+            <input type="text" class="popout-form-text-input" name="artist" placeholder="Artist">
+            <select class="toolbar-select" name="type">
+                <option value="RC">RC</option>
+            </select>
+            <input type="submit" class="toolbar-submit-button" value="Add Remix Comp">
+        </form>
+    </div>
+    <div class="popout-form closed" id="add-post-form">
+        <form method="POST" action="/add-post">
+            <input type="text" class="popout-form-text-input" name="title" placeholder="Title">
+            <select class="toolbar-select" name="type">
+                <option value="spotlight">Spotlight</option>
+                <option value="list">List</option>
+            </select>
+            <input type="submit" class="toolbar-submit-button" value="Add Post">
+        </form>
+    </div>
+    <section class="home-display-section">
+        <h1 class="home-subheading">UNFINISHED REVIEWS</h1>
+            <div class="home-max-width-section">
+                {% for album in to_review %}
+                <div>
+                    <hr>
+                    <a class="home-display-side-container" href="/review/{{ album['id'] }}">
+                        <img src="{{ album['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((album["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ album['name'] }} <span class="small-card-genre">[{{ album['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ album['artist'] }}</p>
+                            <p class="small-card-intro">{{ album['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+                <hr>
+            </div>
+        <div>
+            <a class="section-link" href="/admin-stats/LP/cohesiveness">Bulk cohesiveness edit</a>
+            <br>
+            <br>
+            <a class="section-link" href="/admin-stats/LP/rating">Bulk rating edit</a>
+            <br>
+            <br>
+            <a class="section-link" href="/admin-stats/LP/date">Bulk date edit</a>
+            <br>
+            <br>
+            <a class="section-link" href="/admin-stats/LP/tags">Bulk tags edit</a>
+        </div>
+        <div class="section-link-container">
+            <button class="add-album-button" onclick="openForm('add-album-form-buffer')"><i class="fas fa-plus"></i></button>
+        </div>
+    </section>
+    {% endif %}
+    <section class="home-display-section">
+        <h1 class="home-subheading">RECENT REVIEWS</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <a class="card-container" href="/review/{{ recent_albums[0]['id'] }}">
+                    <div class="big-card-rating">
+                        <p>{{ (((((recent_albums[0]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100 [{{ recent_albums[0]["genre"] }}]</p>
+                    </div>
+                    <img src="{{ recent_albums[0]['image'] }}&tr=w-800,h-800" class="home-display-image img-fluid" alt="Cover art">
+                    <div class="card-info">
+                        <p class="big-card-title">{{ recent_albums[0]["name"] }}</p>
+                        <p class="big-card-artist">{{ recent_albums[0]["artist"] }}</p>
+                        <p class="big-card-intro">{{ recent_albums[0]["introParagraph"] | safe }} </p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 home-section-side">
+                <div class="home-section-side">
+                    <hr>
+                    <a class="home-display-side-container" href="/review/{{ recent_albums[1]['id'] }}">
+                        <img src="{{ recent_albums[1]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((recent_albums[1]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ recent_albums[1]['name'] }} <span class="small-card-genre">[{{ recent_albums[1]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ recent_albums[1]['artist'] }}</p>
+                            <p class="small-card-intro">{{ recent_albums[1]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr>
+                    <a class="home-display-side-container" href="/review/{{ recent_albums[2]['id'] }}">
+                        <img src="{{ recent_albums[2]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((recent_albums[2]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ recent_albums[2]['name'] }} <span class="small-card-genre">[{{ recent_albums[2]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ recent_albums[2]['artist'] }}</p>
+                            <p class="small-card-intro">{{ recent_albums[2]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr>
+                    <a class="home-display-side-container straggler" href="/review/{{ recent_albums[3]['id'] }}">
+                        <img src="{{ recent_albums[3]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((recent_albums[3]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ recent_albums[3]['name'] }} <span class="small-card-genre">[{{ recent_albums[3]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ recent_albums[3]['artist'] }}</p>
+                            <p class="small-card-intro">{{ recent_albums[3]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr class="straggler">
+                </div>
+            </div>
+        </div>
+        <div class="section-link-container">
+            <a href="/reviews" class="section-link">SEE ALL REVIEWS</a>
+        </div>
+    </section>
+    <section class="home-message-section row">
+        <img src="static/logo_alt.svg" class="col-sm-5 img-fluid message-logo" alt="Logo">
+        <div class="message-container col-sm-7">
+            <p class="message">Welcome to my album reviews site! I'm an independent critic/blogger, just wandering through the music scene.<br>I review anything electronic - from chillout to festival bass to experimental, and everything in between - so take your pick!</p>
+            <p class="small-message">Learn more about how I review music <a href="/about">here</a>.<br>Contact me <button class="contact-me-button" onclick="openForm('contact-form')">here</button> to recommend albums, report bugs, or just talk!</p>
+        </div>
+    </section>
+
+    <heading class="dark-separator">
+        <p class="home-subheading">Fancy something?</p>
+    </heading>
+
+    <section class="row recommend-scroller-container">
+        <div class="col-2 left-scroller-arrow-container">
+            <button class="scroller-arrow" id="left-scroller-arrow"><i class="fa-solid fa-arrow-left"></i></button>
+        </div>
+        <div class="col-8 main-scroller-container">
+            <div class="scroller" id="scroller">
+                <a class="scroller-card" style="background-color: darkgoldenrod;" href="/reviews?filter=chillout">
+                    <p class="scroller-card-title">Chillout</p>
+                    <p class="scroller-card-description">Sometimes, you need to chill out.</p>
+                </a>
+                <a class="scroller-card" style="background-color: blue;" href="/reviews?filter=conceptual">
+                    <p class="scroller-card-title">Conceptual</p>
+                    <p class="scroller-card-description">Mind-bendingly experimental.</p>
+                </a>
+                <a class="scroller-card" style="background-color: red;" href="/reviews?filter=pop">
+                    <p class="scroller-card-title">Pop</p>
+                    <p class="scroller-card-description">Lyricism and silky vocals.</p>
+                </a>
+                <a class="scroller-card" style="background-color: black;" href="/reviews?filter=atmosphere">
+                    <p class="scroller-card-title">Atmosphere</p>
+                    <p class="scroller-card-description">Pure immersion.</p>
+                </a>
+                <a class="scroller-card" style="background-color: green;" href="/reviews?filter=aggressive">
+                    <p class="scroller-card-title">Aggressive</p>
+                    <p class="scroller-card-description">Not for the faint of heart.</p>
+                </a>
+                <a class="scroller-card" style="background-color: olive;" href="/reviews?filter=cultural">
+                    <p class="scroller-card-title">Cultural</p>
+                    <p class="scroller-card-description">For those serious about discussing music.</p>
+                </a>
+                <a class="scroller-card" style="background-color: purple;" href="/reviews?filter=synthwave">
+                    <p class="scroller-card-title">Synthwave</p>
+                    <p class="scroller-card-description">It's about the aesthetic.</p>
+                </a>
+                <a class="scroller-card" style="background-color: darkcyan;" href="/reviews?filter=dancefloor">
+                    <p class="scroller-card-title">Dancefloor</p>
+                    <p class="scroller-card-description">Move!</p>
+                </a>
+                <a class="scroller-card" style="background-color: darkslategray;" href="/reviews?filter=hip-hop">
+                    <p class="scroller-card-title">Hip-hop</p>
+                    <p class="scroller-card-description">Influence from the world's biggest genre.</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-2 right-scroller-arrow-container">
+            <button class="scroller-arrow" id="right-scroller-arrow"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="home-display-section">
+        <h1 class="home-subheading">HALL OF FAME</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <a class="card-container" href="/review/{{ hof_albums[0]['id'] }}">
+                    <div class="big-card-rating">
+                        <p>{{ (((((hof_albums[0]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100 [{{ hof_albums[0]["genre"] }}]</p>
+                    </div>
+                    <img src="{{ hof_albums[0]['image'] }}&tr=w-800,h-800" class="home-display-image img-fluid" alt="Cover art">
+                    <div class="card-info">
+                        <p class="big-card-title">{{ hof_albums[0]["name"] }}</p>
+                        <p class="big-card-artist">{{ hof_albums[0]["artist"] }}</p>
+                        <p class="big-card-intro">{{ hof_albums[0]["introParagraph"] | safe }} </p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 home-section-side">
+                <div class="home-section-side">
+                    <hr>
+                    <a class="home-display-side-container" href="/review/{{ hof_albums[1]['id'] }}">
+                        <img src="{{ hof_albums[1]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((hof_albums[1]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ hof_albums[1]['name'] }} <span class="small-card-genre">[{{ hof_albums[1]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ hof_albums[1]['artist'] }}</p>
+                            <p class="small-card-intro">{{ hof_albums[1]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr>
+                    <a class="home-display-side-container" href="/review/{{ hof_albums[2]['id'] }}">
+                        <img src="{{ hof_albums[2]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((hof_albums[2]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ hof_albums[2]['name'] }} <span class="small-card-genre">[{{ hof_albums[2]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ hof_albums[2]['artist'] }}</p>
+                            <p class="small-card-intro">{{ hof_albums[2]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr>
+                    <a class="home-display-side-container straggler" href="/review/{{ hof_albums[3]['id'] }}">
+                        <img src="{{ hof_albums[3]['image'] }}&tr=w-300,h-300" class="home-display-side-image" alt="Cover art">
+                        <p class="small-card-rating">{{ (((((hof_albums[3]["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                        <div class="home-display-side-info">
+                            <p class="small-card-title">{{ hof_albums[3]['name'] }} <span class="small-card-genre">[{{ hof_albums[3]['genre'] }}]</span></p>
+                            <p class="small-card-artist">{{ hof_albums[3]['artist'] }}</p>
+                            <p class="small-card-intro">{{ hof_albums[3]['introParagraph'] | safe }}</p>
+                        </div>
+                    </a>
+                    <hr class="straggler">
+                </div>
+            </div>
+        </div>
+        <div class="section-link-container">
+            <a href="/reviews?hof=true" class="section-link">FULL HALL OF FAME</a>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="home-display-section">
+        <h1 class="home-subheading">LATEST POSTS</h1>
+                <div class="home-max-width-section">
+                    {% for post in posts %}
+                    <div>
+                        <hr>
+                        <a href="/posts/{{ post['id'] }}" class="review-container">
+                            <img src="{{ post['leadImage'] }}&tr=w-200,h-200" alt="Lead image" class="home-display-side-image">
+                            <div class="home-display-side-info">
+                                <p class="small-card-title">{{ post['title'] }}</p>
+                                <p class="small-card-intro">{{ post['summary'] }}</p>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                </div>
+        <div class="section-link-container">
+            <a href="/posts" class="section-link">ALL POSTS</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+<!-- additional js scripts -->
+{% block scripts %}
+<script src="static/homeScript.js"></script>
+{% endblock %}

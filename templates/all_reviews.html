@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+<!-- extra stuff in head -->
+{% block head_content %}
+<title>All Reviews</title>
+<meta property="og:title" content="The Wanderer: All Reviews">
+<meta property="og:description" content="My album reviews website, for all things electronic!">
+<meta property="og:image" content="static/logo_alt.svg">
+{% endblock %}
+
+<!-- main content -->
+{% block content %}
+<div class="home-main-content">
+    <header class="text-centerer">
+        <h1 class="page-title">This is a list of every review I've written. Enjoy!</h1>
+    </header>
+    <br>
+    <hr>
+    <br>
+    <div class="tools-header-container">
+        <h2 class="tools-header">Tools</h2>
+    </div>
+    <section class="reviews-tools">
+        <div class="row">
+            <div class="col-sm-4 toolbar-section">
+                <div class="toolbar-form">
+                    <form id="toolbar-filter-form" onsubmit="return false" method="GET">
+                        <h3 class="toolbar-form-header">Filter by class:</h3>
+                        <label for="filter-select">Class:</label>
+                        <select id="filter-select" name="filter" class="toolbar-select">
+                            <option value="none">None</option>
+                            <option value="chillout">Chillout</option>
+                            <option value="conceptual">Conceptual</option>
+                            <option value="pop">Pop</option>
+                            <option value="atmosphere">Atmosphere</option>
+                            <option value="aggressive">Aggressive</option>
+                            <option value="cultural">Cultural</option>
+                            <option value="synthwave">Synthwave</option>
+                            <option value="dancefloor">Dancefloor</option>
+                            <option value="hip-hop">Hip-hop</option>
+                        </select>
+                        <br>
+                        <input type="submit" value="Apply filter" class="toolbar-submit-button">
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-4 toolbar-section">
+                <div class="toolbar-form">
+                    <form id="toolbar-sort-form" method="GET"" onsubmit="return false">
+                        <h3 class="toolbar-form-header">Sort</h3>
+                        <label for="sort-select">By:</label>
+                        <select id="sort-select" name="sort" class="toolbar-select">
+                            <option value="date">Date written</option>
+                            <option value="rating">Rating</option>
+                            <option value="alphabetical">Alphabetical</option>
+                        </select>
+                        <br>
+                        <input type="submit" value="Apply sort" class="toolbar-submit-button">
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm-4 toolbar-section">
+                <search class="toolbar-form">
+                    <form id="toolbar-search-form" method="GET" onsubmit="return false">
+                        <h3 class="toolbar-form-header">Search</h3>
+                        <label for="search-by">By:</label>
+                        <select name="search-by" id="search-by" class="toolbar-select">
+                            <option value="name">Title</option>
+                            <option value="artist">Artist</option>
+                            <option value="genre">Genre</option>
+                        </select>
+                        <br>
+                        <input type="text" placeholder="Enter search term..." name="search" id="search-term" class="toolbar-input">
+                        <button type="submit" class="toolbar-search-submit-button"><i class="fas fa-search"></i></button>
+                    </form>
+                </search>
+            </div>
+        </div>
+        <div class="toolbar-bottom-tools-container">
+            <button class="toolbar-bottom-button toolbar-reset-button" onclick="resetTools()">Reset tools</button>
+            <div class="toolbar-random-album-container">
+                <a href="/reviews/random-album" class="toolbar-bottom-button">Random album</a>
+                <p class="toolbar-small-text">Click at your own risk.</p>
+            </div>
+        </div>
+    </section>
+    <section class="home-display-section">
+        <div class="home-max-width-section" id="albums-container">
+            {% for album in albums %}
+            {% if album["rating"] > 0 or current_user.is_authenticated %}
+            <div class="album-container" data-tags="{{ album['tags'] }}" data-rating="{{ album['rating'] }}" data-release="{{ album['releaseDate'] }}" data-date="{{ album['date'] }}" data-name="{{ album['name'] }}" data-artist="{{ album['artist'] }}" data-genre="{{ album['genre'] }}">
+                <hr>
+                <a class="review-container" href="/review/{{ album['id'] }}">
+                    <img src="{{ album['image'] }}&tr=w-200,h-200" class="home-display-side-image" alt="Cover art">
+                    <p class="small-card-rating">{{ (((((album["rating"] / 5)|round(0)) * 5))|string)[:-2] }}/100</p>
+                    <div class="home-display-side-info">
+                        <p class="small-card-title">{{ album['name'] }} <span class="small-card-genre">[{{ album['genre'] }}]</span></p>
+                        <p class="small-card-artist">{{ album['artist'] }}</p>
+                        <p class="small-card-intro">{{ album['introParagraph'] | safe }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+<!-- additional js scripts -->
+{% block scripts %}
+<script src="static/allReviewsScript.js"></script>
+{% endblock %}

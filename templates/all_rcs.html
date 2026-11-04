@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+{% block head_content %}
+<title>Remix Compilations</title>
+<meta property="og:title" content="The Wanderer: All Remix Comp Rankings">
+<meta property="og:description" content="My album reviews website, for all things electronic!">
+<meta property="og:image" content="static/logo_alt.svg">
+{% endblock %}
+
+
+{% block content %}
+<div class="home-main-content">
+    <header class="text-centerer">
+        <h1 class="page-title">Ranking remix compilations for albums I've reviewed!</h1>
+    </header>
+    <section class="home-display-section">
+        <div class="home-max-width-section" id="albums-container">
+            {% for rc in rcs %}
+            {% if rc["avgRating"] > 0 or current_user.is_authenticated %}
+            <div class="album-container">
+                <hr>
+                <a class="review-container" href="/rcreview/{{ rc['id'] }}">
+                    <img src="{{ rc['image'] }}&tr=w-200,h-200" class="home-display-side-image" alt="Cover art">
+                    <p class="small-card-rating">{{ ((((rc["avgRating"])|round(0)))|string)[:-2] }}/100</p>
+                    <div class="home-display-side-info">
+                        <p class="small-card-title">{{ rc['name'] }}</p>
+                        <p class="small-card-artist">{{ rc['artist'] }}</p>
+                        <p class="small-card-intro">{{ rc['notes'] }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

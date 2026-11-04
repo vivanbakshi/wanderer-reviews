@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+
+{% block head_content %}
+<title>{{ list["title"] }}</title>
+<meta property="og:title" content="{{ list['title'] }}">
+<meta property="og:description" content="{{ list['summary'] }}">
+<meta property="og:image" content="{{ list['leadImage'] }}">
+{% endblock %}
+
+
+{% block content %}
+<section class="post-main-content">
+    <div class="popout-form closed" id="delete-form">
+        {% set listId = list["id"] %}
+        <button class="delete-album-button" onclick="deletePost('{{ listId }}')">CONFIRM DELETE</button>
+    </div>
+    <h1 class="post-heading" id="title">{{ list["title"] }}</h1>
+    {% if current_user.is_authenticated %}
+        <p class="post-summary post-paragraph" id="summary" {% if current_user.is_authenticated %} contenteditable="true" {% endif %} >{{ list["summary"] | safe }}</p>
+        <br>
+        <p contenteditable="true" id="image">{{ list["leadImage"] }}</p>
+        <br>
+        <p contenteditable="true" id="date">{{ list["dateCreated"] }}</p>
+        <br>
+        <p contenteditable="true" id="ordered">{{ list["ordered"] }}</p>
+        <button class="add-tbt-button" onclick="addItem()">Add List Item</button>
+        <button class="add-tbt-button" onclick="deleteListItem()">Delete Last Item</button>
+    {% else %}
+        <p class="post-summary" id="summary">{{ list["summary"] | safe }}</p>
+    {% endif %}
+    <hr>
+    <div class="spotlight-header-container">
+        <img class="spotlight-lead-image" src="{{ list['leadImage'] }}" alt="Post lead image">
+        <div>
+            <p class="post-paragraph" id="intro-paragraph" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ list["introParagraph"] | safe }}</p>
+        </div>
+    </div>
+    <hr>
+    {% for item in listitems %}
+        <div class="list-item-container">
+            <div class="list-item-header">
+                {% if list["ordered"] == "true" %}
+                <h2 class="list-item-number-container"><span class="list-item-number">{{ item["number"] }}</span>)</h2>
+                {% else %}
+                <h2 class="list-item-number-container closed"><span class="list-item-number">{{ item["number"] }}</span>)</h2>
+                {% endif %}
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <img src="{{ item['image'] }}&tr=w-300,h-300" class="list-item-image" alt="Item image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="list-item-title-container">
+                                <h3 class="list-item-title" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ item["title"] }}</h3>
+                                <h5 class="list-item-artist" {% if current_user.is_authenticated %} contenteditable="true" {% endif %}>{{ item["artist"] }}</h5>
+                            </div>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %} 
+            <p contenteditable="true" class="list-item-image-href">{{ item["image"] }}</p>
+            <br>
+            <p contenteditable="true" class="list-item-content post-paragraph">{{ item["content"] | safe }}</p>
+            {% else %}
+            <p class="list-item-content post-paragraph">{{ item["content"] | safe }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+    {% if current_user.is_authenticated %}
+    <button class="delete-album-button" onclick="openForm('delete-form')">DELETE POST</button>
+    {% endif %}
+</section>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="/static/listScript.js"></script>
+{% endblock %}
